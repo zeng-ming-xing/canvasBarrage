@@ -33,6 +33,11 @@ export default {
       type: Array,
       default: () => [],
     },
+    //每一行速度
+    customSpeed:{
+      type:Array,
+      default: null
+    }
     itemProps: {
       type: Object,
       default:()=> {
@@ -56,10 +61,7 @@ export default {
       type: Object,
       default: () => ({}),
     },
-    customSpeed:{
-      type:Array,
-      default: null
-    }
+
   },
   data() {
     return {
