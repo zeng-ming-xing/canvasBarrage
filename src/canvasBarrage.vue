@@ -190,7 +190,7 @@ export default {
     async appendItem(item, needPush) {
       const img = {}
       if (!item.canvas) {
-        let wish = item[this.itemProps.defaultProps.text] || item.wish
+        let wish = item.wish || item[this.itemProps.defaultProps.text]  
         const special = item.userId == this.authorInfo.userId
         if (special) {
           wish = this.authorInfo.username + '：' + wish
