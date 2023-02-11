@@ -38,7 +38,9 @@ import CanvasBarrage from 'z-canvas-barrage'
     // 数据
     parentList: {
       type: Array,
-      default: () => [],
+      default: () => [{
+        wish:'123123'
+      }],
     },
     //每一行速度
     customSpeed:{
