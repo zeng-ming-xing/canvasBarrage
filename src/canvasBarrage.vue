@@ -11,7 +11,6 @@
 </template>
 
 <script>
-const src = require('@/assets/img/video/icon-v.png')
 export default {
   props: {
     url: {
@@ -33,35 +32,34 @@ export default {
       type: Array,
       default: () => [],
     },
-    //每一行速度
-    customSpeed:{
-      type:Array,
-      default: null
-    }
+    // 每一行速度
+    customSpeed: {
+      type: Array,
+      default: null,
+    },
     itemProps: {
       type: Object,
-      default:()=> {
+      default: () => {
         return {
-        {
-          fontSize: '27',
-          color: '#FFFFFF',
-          backgroundColor: 'rgba(0,0,0,0.3)',
-          borderRadius: '51px',
-          padding: '14-23',
-          text: 'content',
-        },
-        specialProps: {
-          color: '#9D6A0C',
-          backgroundColor: '#FFF0C8',
+          defaultProps: {
+            fontSize: '27',
+            color: '#FFFFFF',
+            backgroundColor: 'rgba(0,0,0,0.3)',
+            borderRadius: '51px',
+            padding: '14-23',
+            text: 'content',
+          },
+          specialProps: {
+            color: '#9D6A0C',
+            backgroundColor: '#FFF0C8',
+          },
         }
-        }
-        }
+      },
     },
     authorInfo: {
       type: Object,
       default: () => ({}),
     },
-
   },
   data() {
     return {
@@ -118,7 +116,7 @@ export default {
       this.$refs.brrageCanvas.height = this.canvasHeight
       this.ctx = this.$refs.brrageCanvas.getContext('2d')
       // this.ctx.scale(this.dpr, this.dpr)
-     if(this.customSpeed){
+      if (this.customSpeed) {
         this.speed = this.customSpeed
       }
       this.list = this.parentList
@@ -291,13 +289,6 @@ export default {
         } else {
           img = this.authorImg
         }
-        const imgV = new Image()
-        imgV.src = src
-        await new Promise((resolve) => {
-          imgV.onload = () => {
-            resolve()
-          }
-        })
         ctx.drawImage(img, radio, Math.ceil(fontSize / 4), 38 * px, 38 * px)
         ctx.drawImage(imgV, radio + 26 * px, Math.ceil(fontSize / 4) + 25 * px, 13 * px, 13 * px)
         ctx.fillText(wish, radio + 46 * px, radio + Math.ceil(fontSize / 4))
