@@ -37,25 +37,6 @@ export default {
       type: Array,
       default: null,
     },
-    itemProps: {
-      type: Object,
-      default: () => {
-        return {
-          defaultProps: {
-            fontSize: '27',
-            color: '#FFFFFF',
-            backgroundColor: 'rgba(0,0,0,0.3)',
-            borderRadius: '51px',
-            padding: '14-23',
-            text: 'content',
-          },
-          specialProps: {
-            color: '#9D6A0C',
-            backgroundColor: '#FFF0C8',
-          },
-        }
-      },
-    },
     authorInfo: {
       type: Object,
       default: () => ({}),
@@ -91,6 +72,20 @@ export default {
       stamp: null,
       dpr: 1,
       rem2px: 50,
+      itemProps:{
+          defaultProps: {
+            fontSize: '27',
+            color: '#FFFFFF',
+            backgroundColor: 'rgba(0,0,0,0.3)',
+            borderRadius: '51px',
+            padding: '14-23',
+            text: 'content',
+          },
+          specialProps: {
+            color: '#9D6A0C',
+            backgroundColor: '#FFF0C8',
+          },
+        }
     }
   },
   created() {
