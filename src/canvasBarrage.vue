@@ -7,9 +7,11 @@
 -->
 <template>
   <canvas ref="brrageCanvas" class="canvas"></canvas>
+  <!-- <div class="test1"> <div class="content">我是123就老师开定价啥都看风景143</div> </div> -->
 </template>
 
 <script>
+const src = require('@/assets/img/video/icon-v.png')
 export default {
   props: {
     url: {
@@ -53,7 +55,7 @@ export default {
       speed: Array(this.lineNum)
         .fill(0)
         .map((item, index) => {
-          return { speed: (Math.random() * 0.2 + 1.5).toFixed(4), row: index + 1 }
+          return { speed: (Math.random() * 1 + 2.5).toFixed(1), row: index + 1 }
         }),
       // 随机选取的背景图片数组
       imgList: [
@@ -89,36 +91,18 @@ export default {
   },
   methods: {
     async initData() {
-      // this.dpr = window.devicePixelRatio
-      this.canvasWidth = this.$refs.brrageCanvas.getBoundingClientRect().width * this.dpr > 750? 750 :this.$refs.brrageCanvas.getBoundingClientRect().width * this.dpr
-      this.canvasHeight = this.$refs.brrageCanvas.getBoundingClientRect().height * this.dpr >750 ? 750 :this.$refs.brrageCanvas.getBoundingClientRect().height * this.dpr
+      this.dpr = window.devicePixelRatio
+      this.canvasWidth = this.$refs.brrageCanvas.getBoundingClientRect().width * this.dpr
+      this.canvasHeight = this.$refs.brrageCanvas.getBoundingClientRect().height * this.dpr
       this.rem2px = +window.getComputedStyle(document.documentElement).fontSize.slice(0, -2)
       this.$refs.brrageCanvas.width = this.canvasWidth
       this.$refs.brrageCanvas.height = this.canvasHeight
       this.ctx = this.$refs.brrageCanvas.getContext('2d')
-      this.ctx.scale(this.dpr,this.dpr)
-      if (this.needItemImage) {
-        const _imgList = this.imgList.map((item) => {
-          const img = new Image()
-          img.crossOrigin = 'Anonymous'
-          img.src = item.url
-          return new Promise((resolve) => {
-            img.onload = () => {
-              item.dom = img
-              resolve(item)
-            }
-          })
-        })
-        await Promise.all(_imgList).then((imgList) => {
-          this.imgList = imgList
-        })
-      }
-
-      this.list = this.parentList
+      // this.ctx.scale(this.dpr, this.dpr)
+      this.list = this.parentList || (await this.$axios.$get('/api/activity/custom/form-list'))
       this.list.forEach((item) => {
-        this.appendItem(item)
+        this.appendItem(item, true)
       })
-      this.draw()
     },
     getRow() {
       const nullIndex = this.lineList.findIndex((item) => {
@@ -153,25 +137,26 @@ export default {
     },
     draw(time) {
       // if (!this.drawList.length) return
-      // this.drawIng = true
+
+      this.drawIng = true
       this.ctx.clearRect(0, 0, this.canvasWidth, this.canvasHeight)
       for (let i = 0; i < this.drawList.length; i++) {
         const item = this.drawList[i]
         if (item) {
           if (item.left < -item.canvas.width) {
-            this.drawList.splice(i, 1, null)
+            // this.drawList.splice(i, 1, null)
             this.lineList[item.row - 1].splice(0, 1)
-            this.appendItem(item)
+            this.appendItem(item, false)
           } else if (this.stamp && time) {
             const delay = time - this.stamp
-            item.left -= (item.speed / 16) * delay
+            item.left -= ((item.speed / 16.7) * delay).toFixed(1)
           } else {
             item.left -= item.speed
           }
-          this.$nextTick(()=>{
-            this.ctx.drawImage(item.canvas, Math.floor(item.left), item.top)
-          })
-          
+          // this.$nextTick(() => {
+
+          this.ctx.drawImage(item.canvas, item.left, item.top)
+          // })
         }
       }
       this.stamp = time
@@ -189,8 +174,8 @@ export default {
       }
       return top
     },
-    async appendItem(item) {
-      const img = this.needItemImage ? this.getImage() : {}
+    async appendItem(item, needPush) {
+      const img = {}
       if (!item.canvas) {
         let wish = item[this.itemProps.defaultProps.text] || item.wish
         const special = item.userId == this.authorInfo.userId
@@ -234,12 +219,16 @@ export default {
         this.lineMaxHeightList[row - 1] = item.canvas.height
       }
       this.lineList[row - 1].push(item)
-      this.drawList.push(item)
+      if (needPush) {
+        this.drawList.push(item)
+        console.log(this.drawList.length)
+      }
+      if (!this.drawIng) this.draw()
     },
     // 创建canvas
     async createCanvasImg(img, fontSize, wish, rate = 3, isSpeciel) {
       // const paddingW = +this.itemProps.defaultProps.padding.split('-')[1]
-      const px = this.rem2px / 100
+      const px = (this.rem2px / 100) * this.dpr
       // const paddingH = +this.itemProps.defaultProps.padding.split('-')[0]
       const canvas = document.createElement('canvas')
       const ctx = canvas.getContext('2d')
@@ -251,59 +240,22 @@ export default {
       const width = 38 * 2 * px + fontWidth + (isSpeciel ? 46 * 2 * px : 0)
       // 无背景图片时 背景的圆角半径
       const radio = height / 2
-      let num = 0
+      const num = 0
       canvas.height = height
-      if (img) {
-        if (fontWidth < width) {
-          canvas.width = width * 2 + fontWidth
-          ctx.drawImage(img, 0, 0, width, height, 0, 0, width, height)
-          ctx.drawImage(img, width, 0, fontWidth, height, width, 0, fontWidth, height)
-          ctx.drawImage(img, width * (rate - 1), 0, width, height, width + fontWidth, 0, width, height)
-        } else {
-          num = Math.ceil(fontWidth / width)
-          canvas.width = width * 2 + num * width + (fontWidth - num * width)
-          ctx.drawImage(img, 0, 0, width, height, 0, 0, width, height)
-          for (let i = 0; i < num; i++) {
-            if (i === num - 1 && fontWidth - i * width < width) {
-              ctx.drawImage(
-                img,
-                width,
-                0,
-                fontWidth - i * width,
-                height,
-                width * (i + 1),
-                0,
-                fontWidth - i * width,
-                height
-              )
-            } else {
-              ctx.drawImage(img, width, 0, width, height, width * (i + 1), 0, width, height)
-            }
-          }
-          ctx.drawImage(img, width * (rate - 1), 0, width, height, width + fontWidth, 0, width, height)
-        }
-      } else {
-        canvas.width = width
-        ctx.fillStyle = isSpeciel
-          ? this.itemProps.specialProps.backgroundColor
-          : this.itemProps.defaultProps.backgroundColor
-        ctx.beginPath()
-        ctx.arc(radio, radio, radio, Math.PI / 2, (3 / 2) * Math.PI)
-        ctx.lineTo(isSpeciel ? radio + fontWidth + 38 * px : radio + fontWidth, 0)
-        ctx.arc(
-          isSpeciel ? radio + fontWidth + 38 * px : radio + fontWidth,
-          radio,
-          radio,
-          (3 / 2) * Math.PI,
-          Math.PI / 2
-        )
-        ctx.lineTo(radio, height)
-        ctx.closePath()
-        ctx.fill()
-      }
+      canvas.width = width
+      ctx.fillStyle = isSpeciel
+        ? this.itemProps.specialProps.backgroundColor
+        : this.itemProps.defaultProps.backgroundColor
+      ctx.beginPath()
+      ctx.arc(radio, radio, radio, Math.PI / 2, (3 / 2) * Math.PI)
+      ctx.lineTo(isSpeciel ? radio + fontWidth + 38 * px : radio + fontWidth, 0)
+      ctx.arc(isSpeciel ? radio + fontWidth + 38 * px : radio + fontWidth, radio, radio, (3 / 2) * Math.PI, Math.PI / 2)
+      ctx.lineTo(radio, height)
+      ctx.closePath()
+      ctx.fill()
       ctx.fillStyle = (isSpeciel ? this.itemProps.specialProps.color : this.itemProps.defaultProps.color) || '#000000'
       ctx.font = `${fontSize}px serif`
-      if (!this.needItemImage && isSpeciel) {
+      if (isSpeciel) {
         let img = null
         if (!this.authorImg) {
           img = await this.clipImg(
@@ -326,17 +278,9 @@ export default {
         })
         ctx.drawImage(img, radio, Math.ceil(fontSize / 4), 38 * px, 38 * px)
         ctx.drawImage(imgV, radio + 26 * px, Math.ceil(fontSize / 4) + 25 * px, 13 * px, 13 * px)
-        ctx.fillText(
-          wish,
-          !this.needItemImage ? radio + 46 * px : (canvas.width - fontWidth) / 2,
-          radio + Math.ceil(fontSize / 4)
-        )
+        ctx.fillText(wish, radio + 46 * px, radio + Math.ceil(fontSize / 4))
       } else {
-        ctx.fillText(
-          wish,
-          !this.needItemImage ? radio : (canvas.width - fontWidth) / 2,
-          radio + Math.ceil(fontSize / 4)
-        )
+        ctx.fillText(wish, radio, radio + Math.ceil(fontSize / 4))
       }
       return canvas
     },
