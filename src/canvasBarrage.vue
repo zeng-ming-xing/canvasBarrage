@@ -18,31 +18,48 @@ export default {
       type: String,
       default: '',
     },
+    // 行数
     lineNum: {
       type: Number,
       default: 4,
     },
+    // 每一行的距离
     lineSpace: {
       type: Number,
       default: 30,
     },
+    // 数据
     parentList: {
       type: Array,
       default: () => [],
     },
     itemProps: {
       type: Object,
-      default: () => ({}),
-    },
-    // 是否需要背景图
-    needItemImage: {
-      type: Boolean,
-      default: true,
+      default:()=> {
+        return {
+        {
+          fontSize: '27',
+          color: '#FFFFFF',
+          backgroundColor: 'rgba(0,0,0,0.3)',
+          borderRadius: '51px',
+          padding: '14-23',
+          text: 'content',
+        },
+        specialProps: {
+          color: '#9D6A0C',
+          backgroundColor: '#FFF0C8',
+        }
+        }
+        }
     },
     authorInfo: {
       type: Object,
       default: () => ({}),
     },
+    customSpeed:{
+      type:Array,
+      default: null
+    }
   },
   data() {
     return {
@@ -99,7 +116,10 @@ export default {
       this.$refs.brrageCanvas.height = this.canvasHeight
       this.ctx = this.$refs.brrageCanvas.getContext('2d')
       // this.ctx.scale(this.dpr, this.dpr)
-      this.list = this.parentList || (await this.$axios.$get('/api/activity/custom/form-list'))
+     if(this.customSpeed){
+        this.speed = this.customSpeed
+      }
+      this.list = this.parentList
       this.list.forEach((item) => {
         this.appendItem(item, true)
       })
