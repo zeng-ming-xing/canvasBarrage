@@ -89,14 +89,12 @@ export default {
     }
   },
   created() {
-    if (process.client) {
       this.lineList = Array(this.lineNum)
         .fill(null)
         .map(() => {
           return []
         })
       this.drawList = []
-    }
   },
   mounted() {
     this.initData()
